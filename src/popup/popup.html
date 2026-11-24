@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArbZoom</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header class="header">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">∞</div>
+          <div class="brand-text">
+            <div class="brand-title">ArbZoom</div>
+            <div class="brand-host" id="siteHost">Active page</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <span class="hyper-badge" id="hyperBadge" hidden>PAST 500%</span>
+          <button class="btn-reset" id="btnReset" title="Reset zoom to 100% (Alt + 0)">Reset</button>
+        </div>
+      </header>
+
+      <div class="restricted-banner" id="restrictedBanner" role="status" hidden>
+        <strong>Restricted browser page.</strong>
+        <span>Arbitrary zoom cannot inject into internal browser pages, but your settings below are still editable.</span>
+      </div>
+
+      <section class="hero-card" id="zoomControls">
+        <div class="readout-row">
+          <button class="step-btn" id="btnZoomOut" title="Zoom out (Alt + -)" aria-label="Zoom out">−</button>
+          <div class="input-wrap">
+            <input
+              type="text"
+              id="zoomInput"
+              class="zoom-input"
+              value="100%"
+              spellcheck="false"
+              autocomplete="off"
+              aria-label="Zoom level"
+              title="Type any zoom % or multiplier (e.g. 2500, 50x, 10k) and press Enter"
+            />
+            <div class="breakdown" id="zoomBreakdown">Optical 1.00× · Type any %</div>
+          </div>
+          <button class="step-btn" id="btnZoomIn" title="Zoom in (Alt + =)" aria-label="Zoom in">+</button>
+        </div>
+
+        <div class="slider-block">
+          <input
+            type="range"
+            id="zoomSlider"
+            class="zoom-slider"
+            min="0"
+            max="1000"
+            step="1"
+            value="333"
+            aria-label="Logarithmic zoom slider"
+            aria-valuetext="100%"
+          />
+          <div class="slider-ticks" aria-hidden="true">
+            <span class="tick tick-start">10%</span>
+            <span class="tick" style="left: 33.3%">100%</span>
+            <span class="tick tick-cap" style="left: 56.6%">500%</span>
+            <span class="tick" style="left: 66.7%">1k%</span>
+            <span class="tick tick-end">10k%</span>
+          </div>
+        </div>
+
+        <div class="presets" id="presets">
+          <button class="preset-chip" data-scale="0.5" aria-pressed="false">50%</button>
+          <button class="preset-chip" data-scale="1" aria-pressed="true">100%</button>
+          <button class="preset-chip" data-scale="2.5" aria-pressed="false">250%</button>
+          <button class="preset-chip" data-scale="5" aria-pressed="false">500%</button>
+          <button class="preset-chip hyper-chip" data-scale="10" aria-pressed="false">1,000%</button>
+          <button class="preset-chip hyper-chip" data-scale="25" aria-pressed="false">2,500%</button>
+          <button class="preset-chip hyper-chip" data-scale="50" aria-pressed="false">5,000%</button>
+          <button class="preset-chip hyper-chip" data-scale="100" aria-pressed="false">10,000%</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-label">Zoom Mechanism</div>
+        <div class="segmented" id="modeGroup" role="radiogroup" aria-label="Zoom mode">
+          <button class="seg-btn active" id="modeOptical" data-mode="optical" role="radio" aria-checked="true" tabindex="0">
+            <span class="seg-title">Optical</span>
+            <span class="seg-sub">Preserves layout &amp; pan</span>
+          </button>
+          <button class="seg-btn" id="modeHybrid" data-mode="hybrid" role="radio" aria-checked="false" tabindex="-1">
+            <span class="seg-title">Hybrid</span>
+            <span class="seg-sub">Reflow ≤500% · Optical past</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="toggles-grid">
+          <button class="toggle-tile" id="togglePan" aria-pressed="false">
+            <span class="tile-icon" aria-hidden="true">✋</span>
+            <span class="tile-text">
+              <span class="tile-title">Pan Mode</span>
+              <span class="tile-sub">Drag anywhere</span>
+            </span>
+          </button>
+          <button class="toggle-tile" id="togglePixelated" aria-pressed="false">
+            <span class="tile-icon" aria-hidden="true">▦</span>
+            <span class="tile-text">
+              <span class="tile-title">Crisp Pixels</span>
+              <span class="tile-sub">Nearest neighbor</span>
+            </span>
+          </button>
+          <button class="toggle-tile" id="toggleHud" aria-pressed="true">
+            <span class="tile-icon" aria-hidden="true">◎</span>
+            <span class="tile-text">
+              <span class="tile-title">On-Page HUD</span>
+              <span class="tile-sub">Pill &amp; minimap</span>
+            </span>
+          </button>
+          <button class="toggle-tile" id="toggleRemember" aria-pressed="true">
+            <span class="tile-icon" aria-hidden="true">★</span>
+            <span class="tile-text">
+              <span class="tile-title">Per-Site</span>
+              <span class="tile-sub">Remember zoom</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <details class="settings-drawer">
+        <summary class="drawer-summary">
+          <span>Controls &amp; Shortcuts</span>
+          <span class="chevron" aria-hidden="true">▾</span>
+        </summary>
+        <div class="drawer-body">
+          <label class="setting-row">
+            <span>Wheel / Pinch trigger</span>
+            <select id="selectWheelTrigger">
+              <option value="both">Ctrl/Pinch + Alt</option>
+              <option value="alt">Alt + Scroll only</option>
+              <option value="ctrl">Ctrl / Pinch only</option>
+              <option value="shift">Shift + Scroll</option>
+              <option value="off">Disabled</option>
+            </select>
+          </label>
+
+          <label class="setting-row">
+            <span>Zoom step multiplier</span>
+            <select id="selectStepFactor">
+              <option value="1.1">1.1× (Fine)</option>
+              <option value="1.25">1.25× (Standard)</option>
+              <option value="1.5">1.5× (Fast)</option>
+              <option value="2">2.0× (Turbo)</option>
+            </select>
+          </label>
+
+          <label class="setting-row checkbox-row">
+            <span>Magnetic snap to 100%</span>
+            <input type="checkbox" id="checkMagneticSnap" />
+          </label>
+
+          <label class="setting-row checkbox-row">
+            <span>Override Ctrl/Cmd + / − / 0</span>
+            <input type="checkbox" id="checkOverrideCtrl" />
+          </label>
+
+          <div class="shortcuts-box">
+            <div class="shortcut-item"><span>Zoom in / out</span><kbd>Alt + = / −</kbd></div>
+            <div class="shortcut-item"><span>Reset to 100%</span><kbd>Alt + 0</kbd></div>
+            <div class="shortcut-item"><span>Drag to pan</span><kbd>Space + Drag</kbd></div>
+            <div class="shortcut-item"><span>Global commands</span><kbd>Alt+Shift+↑/↓</kbd></div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <script src="../shared/browser-api.js"></script>
+    <script src="../shared/constants.js"></script>
+    <script src="../shared/zoom-math.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "arb-zoom",
+  "version": "1.0.0",
+  "description": "Arbitrary webpage zoom extension for Chrome and Firefox — smoothly zoom past the 500% browser limit with pan, minimap, and hybrid reflow modes.",
+  "private": true,
+  "scripts": {
+    "icons": "node scripts/generate-icons.mjs",
+    "build": "node scripts/build.mjs",
+    "pretest": "node scripts/build.mjs",
+    "test": "node --test test/*.test.mjs"
+  }
+}

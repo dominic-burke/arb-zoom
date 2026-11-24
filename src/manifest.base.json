@@ -1,0 +1,70 @@
+{
+  "manifest_version": 3,
+  "name": "ArbZoom — Arbitrary Page Zoom",
+  "version": "1.0.0",
+  "description": "Zoom webpages from 1% to 1,000,000% past the 500% cap, with cursor-centered zoom, drag-to-pan, minimap, and hybrid reflow mode.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "ArbZoom — Arbitrary Page Zoom",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "shared/browser-api.js",
+        "shared/constants.js",
+        "shared/zoom-math.js",
+        "content/zoom-engine.js",
+        "content/hud.js",
+        "content/content.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "commands": {
+    "zoom-in": {
+      "suggested_key": {
+        "default": "Alt+Shift+Up",
+        "mac": "MacCtrl+Shift+Up"
+      },
+      "description": "Zoom in arbitrarily"
+    },
+    "zoom-out": {
+      "suggested_key": {
+        "default": "Alt+Shift+Down",
+        "mac": "MacCtrl+Shift+Down"
+      },
+      "description": "Zoom out arbitrarily"
+    },
+    "zoom-reset": {
+      "suggested_key": {
+        "default": "Alt+Shift+0",
+        "mac": "MacCtrl+Shift+0"
+      },
+      "description": "Reset zoom to 100%"
+    },
+    "toggle-pan": {
+      "suggested_key": {
+        "default": "Alt+Shift+H",
+        "mac": "MacCtrl+Shift+H"
+      },
+      "description": "Toggle drag-to-pan hand mode"
+    }
+  }
+}
